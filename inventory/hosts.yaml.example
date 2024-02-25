@@ -1,0 +1,30 @@
+# define aliases in your inventory using host variables, for example:
+#    jumper ansible_port=5555 ansible_host=192.0.2.50
+
+monitor:
+  hosts:
+    stg-monitor.rex.lab:
+      ansible_user: root
+
+bastion:
+  hosts:
+    stg-bastion.rex.lab:
+
+kubernetes:
+  children:
+    master:
+      hosts:
+        stg-k8s-master-0.rex.lab:
+          ansible_host: 192.168.1.20
+        stg-k8s-master-1.rex.lab:
+          ansible_host: 192.168.1.21
+        stg-k8s-master-2.rex.lab:
+          ansible_host: 192.168.1.22
+    worker:
+      hosts:
+        stg-k8s-infra-0.rex.lab:
+          ansible_host: 192.168.1.23
+        stg-k8s-sre-0.rex.lab:
+          ansible_host: 192.168.1.24
+        stg-k8s-worker-0.rex.lab:
+          ansible_host: 192.168.1.25

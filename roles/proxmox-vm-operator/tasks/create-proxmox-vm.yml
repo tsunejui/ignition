@@ -1,0 +1,37 @@
+---
+
+- name: "Print the vm information"
+  ansible.builtin.debug:
+    msg:
+      - "node name: {{ node.name }}"
+      - "vm name: {{ vm.name | default(default_vm.name) }}"
+      - "vm template: {{ vm.temp }}"
+      - "cpu: {{ vm.cpu | default(default_vm.cpu) }}, memory: {{ vm.memory| default(default_vm.memory) }}, disk: {{ vm.disk| default(default_vm.disk) }}"
+      - "ips: {{ node_ips }}"
+
+- name: Create Proxmox VM
+  environment:
+    PM_API_TOKEN_ID: "{{ pm_user }}!{{ pm_token_id }}"
+    PM_API_TOKEN_SECRET: "{{ pm_secret }}"
+  community.general.terraform:
+    project_path: "{{ role_path }}/files/terraform/create-vm"
+    state: "present"
+    complex_vars: true
+    variables:
+      vmid: "{{ vmid }}"
+      pm_host: "{{ pm_host }}"
+      name: "{{ vm.name | default(default_vm.name) }}"
+      description: "{{ vm.name | default(default_vm.name) }} of kubernetes cluster"
+      ips: "{{ node_ips }}"
+      node: "{{ node.name }}"
+      storage: "{{ node.storage }}"
+      clone: "{{ vm.temp }}"
+      gateway: "{{ vm.gateway_ip }}"
+      cpu: "{{ vm.cpu | default(default_vm.cpu) }}"
+      memory: "{{ vm.memory| default(default_vm.memory) }}"
+      disk_size: "{{ vm.disk| default(default_vm.disk) }}"
+      ssh_user: "{{ ssh_user }}"
+      ssh_key: "{{ ssh_private_key }}"
+    workspace: "{{ hosts_group }}"
+    purge_workspace: true
+    force_init: true

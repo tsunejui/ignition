@@ -1,0 +1,10 @@
+---
+hosts_group: all
+default_vm:
+  name: "proxmox-vm"
+  cpu: 5
+  memory: 4096
+  disk: "32G"
+node:
+  start_id: "100"
+force: false

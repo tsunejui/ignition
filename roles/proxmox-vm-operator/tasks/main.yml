@@ -1,0 +1,5 @@
+---
+
+- name: Create Proxmox VMs
+  ansible.builtin.include_tasks: action-create.yaml
+  when: action == 'create'

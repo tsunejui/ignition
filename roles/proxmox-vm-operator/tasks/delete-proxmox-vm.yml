@@ -1,0 +1,26 @@
+---
+- name: Verify VM status
+  community.general.proxmox_vm_info:
+    api_user: "{{ pm_user }}"
+    api_host: "{{ pm_host }}"
+    api_token_id: "{{ pm_token_id }}"
+    api_token_secret: "{{ pm_secret }}"
+    node: "{{ node.name }}"
+    vmid: "{{ vmid }}"
+  register: vm_info
+
+- name: Print VM status
+  ansible.builtin.debug:
+    msg:
+      - "{{ vm_info }}"
+
+- name: Remove VM
+  community.general.proxmox_kvm:
+    api_user: "{{ pm_user }}"
+    api_host: "{{ pm_host }}"
+    api_token_id: "{{ pm_token_id }}"
+    api_token_secret: "{{ pm_secret }}"
+    node: "{{ node.name }}"
+    vmid: "{{ vmid }}"
+    state: absent
+  when: vm_info.proxmox_vms | length > 0

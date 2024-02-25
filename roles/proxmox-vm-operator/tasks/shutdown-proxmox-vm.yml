@@ -1,0 +1,27 @@
+---
+- name: Verify VM status
+  community.general.proxmox_vm_info:
+    api_user: "{{ pm_user }}"
+    api_host: "{{ pm_host }}"
+    api_token_id: "{{ pm_token_id }}"
+    api_token_secret: "{{ pm_secret }}"
+    node: "{{ node.name }}"
+    vmid: "{{ vmid }}"
+  register: vm_info
+
+- name: Print Shutdown VM status
+  ansible.builtin.debug:
+    msg:
+      - "{{ vm_info }}"
+
+- name: Stop VM with force
+  community.general.proxmox_kvm:
+    api_user: "{{ pm_user }}"
+    api_host: "{{ pm_host }}"
+    api_token_id: "{{ pm_token_id }}"
+    api_token_secret: "{{ pm_secret }}"
+    node: "{{ node.name }}"
+    vmid: "{{ vmid }}"
+    state: stopped
+    force: true
+  when: vm_info.proxmox_vms | length > 0

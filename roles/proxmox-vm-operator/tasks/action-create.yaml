@@ -1,0 +1,51 @@
+---
+
+- name: Check Current VM ID
+  ansible.builtin.set_fact:
+    current_vmid: "{{ current_vmid | default(node.start_id | int) }}"
+
+- name: Shutdown Proxmox VMs
+  ansible.builtin.include_tasks: shutdown-proxmox-vm.yml
+  vars:
+    vmid: "{{ current_vmid | int + item | int - 1}}"
+  with_sequence: start=1 end={{ groups[hosts_group] | length}}
+
+- name: "Test reachability to {{ item }}"
+  ansible.builtin.shell: ping -c 1 -W 1 {{ hostvars[item]['ansible_host'] }}
+  ignore_errors: true
+  register: ping_results
+  with_items: "{{ groups[hosts_group] }}"
+
+- name: Filter used IPs
+  ansible.builtin.set_fact:
+    ips: "{{ ips | default([]) + [hostvars[groups[hosts_group][item[0]]]['ansible_host']] }}"
+  when: item[1].rc != 0
+  with_indexed_items: "{{ ping_results['results'] }}"
+
+- name: Check Finial VM ID
+  ansible.builtin.set_fact:
+    finial_vmid: "{{ current_vmid | int + ips | length - 1}}"
+
+- name: Delete Proxmox VMs
+  ansible.builtin.include_tasks: delete-proxmox-vm.yml
+  vars:
+    vmid: "{{ current_vmid | int + item | int - 1}}"
+  with_sequence: start=1 end={{ ips | length}}
+  when: force
+
+- name: Create Proxmox VMs
+  ansible.builtin.include_tasks: create-proxmox-vm.yml
+  vars:
+    node_ips: "{{ ips }}"
+    vmid: "{{ current_vmid | int }}"
+    state: "present"
+    
+- name: Print Proxmox VM IDs
+  ansible.builtin.debug:
+    msg:
+      - "Proxmox VMs has been created, the IDs: {{ current_vmid }} - {{ finial_vmid }}"
+
+- name: set up current VM ID
+  ansible.builtin.set_fact:
+    ips: []
+    current_vmid: "{{ finial_vmid | int + 1}}"

@@ -1,0 +1,11 @@
+{
+    "cSpell.words": [
+        "containerd",
+        "hostvars",
+        "ipvs",
+        "PVEAPI",
+        "runc",
+        "vmid"
+    ],
+    "ansible.python.interpreterPath": "/opt/homebrew/bin/python3"
+}

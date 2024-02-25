@@ -1,0 +1,63 @@
+---
+ssh_key:
+  public_path: example/id_rsa.pub
+  private_path: example/id_rsa
+
+# Proxmox opts
+proxmox:
+  api_info:
+    user: ignition@pve
+    host: 192.168.1.100
+    token_id: "<token_id>"
+    secret: "<secret>"
+  node:
+    name: node_name
+    ssh_user: root
+    storage: hdd
+  vm:
+    start_id: 300
+    force_delete: false
+  network:
+    gateway_ip_addr: 192.168.1.1
+  template:
+    image:
+      rocket8:
+        name: temp-rocky-8
+        url: http://dl.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-GenericCloud.latest.x86_64.qcow2
+
+# Monitor opts
+monitor:
+  grafana:
+    version: 10.2.4
+
+# Kubernetes opts
+kubernetes:
+  version: 1.26.3
+  resource:
+    os_template: temp-rocky-8
+    master:
+      cpu: 2
+      memory: 4096
+      disk: 32G
+    worker:
+      cpu: 2
+      memory: 4096
+      disk: 32G
+
+  # Supported: containerd
+  runtime:
+    cri: containerd
+    containerd:
+      version: 1.6.19
+      runc:
+        version: 1.1.4
+
+  # Supported: calico
+  network:
+    cni: calico
+    calico:
+      version: 3.25.0
+    pod_network_cidr: 10.244.0.0/16
+    service_network_cidr: 10.96.0.0/12
+    kubeProxy:
+      mode: ipvs

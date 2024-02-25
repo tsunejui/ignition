@@ -57,22 +57,22 @@ action: create
 hosts_group: worker
 vm:
   name: "k8s-worker"
-  temp: "{{ kubernetes.resource.os_template }}"
-  cpu: "{{ kubernetes.resource.worker.cpu }}"
-  memory: "{{ kubernetes.resource.worker.memory }}"
-  disk: "{{ kubernetes.resource.worker.disk }}"
-  gateway_ip: "{{ proxmox.network.gateway_ip_addr  }}"
-ssh_private_key: "{{ lookup('file', playbook_dir + '/' + ssh_key.private_path) }}"
-force: "{{ proxmox.vm.force_delete }}"
-pm_user: "{{ proxmox.api_info.user  }}"
-pm_host: "{{ proxmox.api_info.host }}"
-pm_token_id: "{{ proxmox.api_info.token_id }}"
-pm_secret: "{{ proxmox.api_info.secret }}"
-ssh_user: "{{ proxmox.node.ssh_user }}"
+  temp: "<tmp-name>"
+  cpu: 4
+  memory: 8192
+  disk: "100G"
+  gateway_ip: "192.168.1.1"
+ssh_private_key: "{{ lookup('file', playbook_dir + '/example/id_rsa') }}"
+force: false
+pm_user: "<proxmox-api-user>"
+pm_host: "<proxmox-api-host>"
+pm_token_id: "<proxmox-api-token-id>"
+pm_secret: "<proxmox-api-token-secret>"
+ssh_user: "<proxmox-vm-ssh-user>"
 node:
-  start_id: "{{ proxmox.vm.start_id  }}"
-  name: "{{ proxmox.node.name }}"
-  storage: "{{ proxmox.node.storage }}"
+  start_id: 500
+  name: "<proxmox-node-name>"
+  storage: "<proxmox-node-storage>"
 ```
 
 Example Playbook

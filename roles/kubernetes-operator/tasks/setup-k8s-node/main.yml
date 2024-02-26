@@ -1,0 +1,69 @@
+---
+- name: Try to connect to host
+  ansible.builtin.ping:
+
+- name: Install hostctl tool
+  ansible.builtin.include_tasks: install-tool-hostctl.yml
+
+- name: Install dasel tool
+  ansible.builtin.include_tasks: install-tool-dasel.yml
+
+- name: Update /etc/hosts contenes
+  ansible.builtin.include_tasks: update-hosts-file.yml
+
+- name: Turn off firewall service
+  ansible.builtin.include_tasks: disable-firewalld-service.yml
+
+- name: Turn off swap and SELinux
+  ansible.builtin.shell: |
+    # disable swapping
+    swapoff -a
+    sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+    # disable selinux
+    setenforce 0
+    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+    exit 0
+  args:
+    executable: /bin/bash
+
+- name: Load overlay kernel modules
+  community.general.modprobe:
+    name: overlay
+    state: present
+
+- name: Load br_netfilter kernel modules
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Set bridge-nf-call-iptables
+  ansible.posix.sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    
+- name: Set bridge-nf-call-ip6tables
+  ansible.posix.sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+
+- name: Set ip_forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+
+- name: Install OCI runtime tiik
+  ansible.builtin.include_tasks: install-tool-runc.yml
+
+- name: Install CNI Plugin
+  ansible.builtin.include_tasks: install-tool-cni-plugin.yml
+
+- name: Install CRI
+  ansible.builtin.include_tasks: install-tool-containerd.yml
+
+- name: Install ipvsadm
+  ansible.builtin.include_tasks: install-tool-containerd.yml
+
+- name: Install kubernetes package
+  ansible.builtin.include_tasks: install-rhel-kubernetes.yml

@@ -1,0 +1,4 @@
+---
+- name: Setup Kubernetes Node
+  ansible.builtin.include_tasks: setup-k8s-node/main.yml
+  when: action == 'setup'

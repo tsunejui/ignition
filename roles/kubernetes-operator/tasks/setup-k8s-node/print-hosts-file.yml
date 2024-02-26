@@ -1,0 +1,10 @@
+---
+
+- name: Check /etc/hosts contents
+  ansible.builtin.shell: cat /etc/hosts
+  register: hosts_file
+
+- name: Show /etc/hosts contents
+  ansible.builtin.debug:
+    msg:
+      - "{{ hosts_file.stdout_lines }}"

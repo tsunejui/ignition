@@ -19,11 +19,12 @@ Feature list:
 `Ignition` use various Ansible roles to help user establish a high-availability Kubernetes cluster on Proxmox. Take a look the roles `Ignition` are using:
 
 - [proxmox-vm-operator](./roles/proxmox-vm-operator)
+- [kubernetes-operator](./roles/kubernetes-operator)
 
 ## Usage
 
 Run the following playbook shell to generate a new Kubernetes cluster on Proxmox:
 
 ```sh
-$ ansible-playbook -i inventory  proxmox-create-k8s.yml --connection=local --vault-password-file inventory/group_vars/.vault_password.txt
+$ ansible-playbook -i inventory  proxmox-create-k8s.yml --vault-password-file inventory/group_vars/.vault_password.txt
 ```

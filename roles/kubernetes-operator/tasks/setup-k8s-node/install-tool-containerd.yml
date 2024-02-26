@@ -1,0 +1,78 @@
+---
+
+- name: Setup containerd version
+  ansible.builtin.set_fact:
+    containerd_version: "{{ containerd_version | default(tools.containerd.version) }}"
+
+- name: Check if a containerd existed
+  ansible.builtin.shell: test -e /usr/local/bin/containerd
+  ignore_errors: true
+  register: is_containerd_exists
+
+- name: Verify containerd version is correct
+  ansible.builtin.shell: /usr/local/bin/containerd -v | grep v{{ containerd_version }}
+  ignore_errors: true
+  register: is_containerd_version_correct
+  when: is_containerd_exists.rc == 0
+
+- name: Download containerd tool
+  ansible.builtin.unarchive:
+    src: https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}-linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: true
+    mode: '0440'
+  when: (is_containerd_exists.rc != 0) or (is_containerd_version_correct.rc != 0)
+
+- name: Create containerd directory if it does not exist
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: '0755'
+
+- name: Check if config file existed
+  ansible.builtin.shell: test -e /etc/containerd/config.toml
+  ignore_errors: true
+  register: is_containerd_config_exists
+
+- name: Generate containerd default config
+  ansible.builtin.shell: /usr/local/bin/containerd config default > /etc/containerd/config.toml
+  when: is_containerd_config_exists.rc != 0
+
+- name: Verify systemd cgroup setting of containerd config
+  ansible.builtin.shell: |
+    dasel -f /etc/containerd/config.toml \
+          -r toml plugins."io\.containerd\.grpc\.v1\.cri".containerd.runtimes.runc.options.SystemdCgroup
+  register: systemd_cgroup_setting
+
+- name: Update systemd cgroup setting
+  ansible.builtin.shell: |
+    dasel put -f /etc/containerd/config.toml \
+              -r toml plugins."io\.containerd\.grpc\.v1\.cri".containerd.runtimes.runc.options.SystemdCgroup \
+              -t bool \
+              -v true
+  when: systemd_cgroup_setting.stdout == 'false'
+
+- name: Download containerd service file
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/containerd/containerd/v{{ containerd_version }}/containerd.service
+    dest: /usr/lib/systemd/system/containerd.service
+    mode: '0440'
+
+- name: Check if containerd enable
+  ansible.builtin.shell: systemctl is-enabled containerd.service
+  register: is_containerd_enable
+  ignore_errors: true
+
+- name: Enable containerd service and ensure it is not masked
+  ansible.builtin.systemd_service:
+    name: containerd
+    daemon_reload: true
+    enabled: true
+    masked: no
+  when: is_containerd_enable.rc != 0
+
+- name: Start containerd service
+  ansible.builtin.systemd_service:
+    name: containerd
+    state: started
+

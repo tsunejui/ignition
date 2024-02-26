@@ -1,0 +1,18 @@
+---
+- name: Setup dasel version
+  ansible.builtin.set_fact:
+    dasel_version: "{{ dasel_version | default(tools.dasel.version) }}"
+
+- name: Check if a dasel command existed
+  ansible.builtin.shell: command -v dasel
+  args:
+    executable: /bin/bash
+  register: is_dasel_exists
+  ignore_errors: true
+
+- name: Download dasel
+  ansible.builtin.get_url:
+    url: https://github.com/TomWright/dasel/releases/download/v{{ dasel_version }}/dasel_linux_amd64
+    dest: /usr/bin/dasel
+    mode: "0755"
+  when: is_dasel_exists.rc != 0

@@ -1,0 +1,7 @@
+galaxy_info:
+  author: kubernetes
+  description: A ansible role to install and configure kubernetes on RedHat compatible linux.
+  license: "license (BSD, MIT)"
+  min_ansible_version: "2.1"
+  galaxy_tags: []
+dependencies: []

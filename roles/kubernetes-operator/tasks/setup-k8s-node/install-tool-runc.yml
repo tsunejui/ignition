@@ -1,0 +1,31 @@
+---
+
+- name: Setup runc version
+  ansible.builtin.set_fact:
+    runc_version: "{{ runc_version | default(tools.runc.version) }}"
+
+- name: Check if a runc existed
+  ansible.builtin.shell: test -e /usr/local/sbin/runc
+  ignore_errors: true
+  register: is_runc_exists
+
+- name: Verify runc version is correct
+  ansible.builtin.shell: /usr/local/sbin/runc -v | grep {{ runc_version }}
+  ignore_errors: true
+  register: is_runc_version_correct
+  when: is_runc_exists.rc == 0
+
+- name: Set install vatiable
+  ansible.builtin.set_fact:
+    install_runc: "{{ (is_runc_exists.rc != 0) or (is_runc_version_correct.rc != 0) }}"
+
+- name: Download runc binary
+  ansible.builtin.get_url:
+    url: https://github.com/opencontainers/runc/releases/download/v{{ runc_version }}/runc.amd64
+    dest: /tmp/runc.amd64
+    mode: '0440'
+  when: install_runc
+  
+- name: Install runc 
+  ansible.builtin.shell: install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
+  when: install_runc

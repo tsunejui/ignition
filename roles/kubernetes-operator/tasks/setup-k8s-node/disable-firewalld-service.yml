@@ -1,0 +1,14 @@
+---
+
+- name: Check if firewalld enable
+  ansible.builtin.shell: systemctl is-enabled firewalld.service
+  register: is_firewalld_enable
+  ignore_errors: true
+
+- name: Disable firewall service
+  ansible.builtin.systemd_service:
+    name: firewalld
+    state: stopped
+    enabled: false
+    masked: no
+  when: is_firewalld_enable.rc == 0

@@ -1,0 +1,25 @@
+---
+
+- name: Setup CNI plugin version
+  ansible.builtin.set_fact:
+    cni_plugin_version: "{{ cni_plugin_version | default(tools.cni.plugin.version) }}"
+
+- name: Check if a plugin directory existed
+  ansible.builtin.shell: test -d /opt/cni/bin
+  ignore_errors: true
+  register: is_cni_plugin_exists
+
+- name: Create plugin directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    state: directory
+    mode: '0755'
+  when: is_cni_plugin_exists.rc != 0
+
+- name: Download CNI plugin
+  ansible.builtin.unarchive:
+    src: https://github.com/containernetworking/plugins/releases/download/v{{ cni_plugin_version }}/cni-plugins-linux-amd64-v{{ cni_plugin_version }}.tgz
+    dest: /opt/cni/bin
+    remote_src: true
+    mode: '0440'
+  when: is_cni_plugin_exists.rc != 0

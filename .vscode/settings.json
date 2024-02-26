@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "containerd",
+        "hostctl",
         "hostvars",
         "ipvs",
         "PVEAPI",

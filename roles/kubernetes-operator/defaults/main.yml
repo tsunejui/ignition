@@ -1,0 +1,15 @@
+---
+kubernetes:
+  version: 1.26.3
+tools:
+  hostctl:
+    version: 1.1.4
+  dasel:
+    version: 2.6.0
+  containerd:
+    version: 1.6.19
+  runc:
+    version: 1.1.12
+  cni:
+    plugin:
+      version: 1.4.0

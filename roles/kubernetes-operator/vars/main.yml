@@ -1,0 +1,5 @@
+---
+k8s_version: 1.26.3
+containerd_version: 1.6.19
+runc_version: 1.1.4
+calico_version: 3.25.0

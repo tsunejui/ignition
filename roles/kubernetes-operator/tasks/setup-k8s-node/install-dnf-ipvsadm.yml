@@ -1,0 +1,6 @@
+---
+
+- name: Install the latest version of Apache
+  ansible.builtin.dnf:
+    name: ipvsadm
+    state: latest

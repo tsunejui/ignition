@@ -1,0 +1,25 @@
+---
+- name: Setup hostctl version
+  ansible.builtin.set_fact:
+    hostctl_version: "{{ hostctl_version | default(tools.hostctl.version) }}"
+
+- name: Check if a hostctl command existed
+  ansible.builtin.shell: command -v hostctl
+  args:
+    executable: /bin/bash
+  register: is_hostctl_exists
+  ignore_errors: true
+
+- name: Download hostctl
+  ansible.builtin.get_url:
+    url: https://github.com/guumaster/hostctl/releases/download/v{{ hostctl_version }}/hostctl_{{ hostctl_version }}_linux_64-bit.tar.gz
+    dest: /tmp/hostctl_{{ hostctl_version }}_linux_64-bit.tar.gz
+    mode: '0440'
+  when: is_hostctl_exists.rc != 0
+
+- name: Unarchive hostctl tar file
+  ansible.builtin.unarchive:
+    src: /tmp/hostctl_{{ hostctl_version }}_linux_64-bit.tar.gz
+    dest: /usr/bin
+    remote_src: true
+  when: is_hostctl_exists.rc != 0

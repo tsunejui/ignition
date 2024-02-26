@@ -1,0 +1,15 @@
+---
+
+- name: Print /etc/hosts
+  ansible.builtin.include_tasks: print-hosts-file.yml
+
+- name: Remove profile with hostctl
+  ansible.builtin.shell: hostctl remove {{ role_name }}
+  ignore_errors: true
+
+- name: Update /etc/hosts with hostctl
+  ansible.builtin.shell: hostctl add domains {{ role_name }} {{ item }} --ip {{ hostvars[item]['ansible_host'] }}
+  with_items: "{{ ansible_play_hosts_all }}"
+
+- name: Print /etc/hosts
+  ansible.builtin.include_tasks: print-hosts-file.yml
